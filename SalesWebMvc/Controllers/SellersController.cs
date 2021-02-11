@@ -55,7 +55,7 @@ namespace SalesWebMvc.Controllers
         {
             if(id == null)
             {
-                return RedirectToAction(nameof(Error), new {message = "Id not provided" });
+                return RedirectToAction(nameof(Error), new { message = "Id not provided" });
             }
 
             var obj = await _sellerService.FindByIdAsync(id.Value);
@@ -70,8 +70,15 @@ namespace SalesWebMvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            await _sellerService.RemoveAsync(id);
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                await _sellerService.RemoveAsync(id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch(IntegrityException e)
+            {
+                return RedirectToAction(nameof(Error), new { message = e.Message });
+            }
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -81,7 +88,7 @@ namespace SalesWebMvc.Controllers
                 return RedirectToAction(nameof(Error), new { message = "Id not provided" });
             }
 
-            var obj =  await _sellerService.FindByIdAsync(id.Value);
+            var obj = await _sellerService.FindByIdAsync(id.Value);
 
             if(obj == null)
             {
@@ -127,7 +134,7 @@ namespace SalesWebMvc.Controllers
 
             try
             {
-                 await _sellerService.UpdateAsync(seller);
+                await _sellerService.UpdateAsync(seller);
                 return RedirectToAction(nameof(Index));
             }
             catch(NotFoundException e)
